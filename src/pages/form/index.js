@@ -48,6 +48,35 @@ const Pathways = [
 
 const GeneInputMethods = { Manual: "manual", Import: "import" };
 
+const virusGenes = [
+  "NSP1",
+  "NSP7",
+  "ORF8",
+  "NSP10",
+  "E",
+  "N",
+  "M",
+  "NSP6",
+  "ORF6",
+  "ORF7A",
+  "ORF9C",
+  "NSP4",
+  "NSP8",
+  "NSP9",
+  "ORF10",
+  "NSP14",
+  "S",
+  "ORF3A",
+  "NSP13",
+  "ORF3B",
+  "NSP5",
+  "NSP12",
+  "NSP2",
+  "ORF9B",
+  "NSP11",
+  "NSP15",
+];
+
 function AnnotationForm(props) {
   const geneInputRef = React.createRef();
   const [genes, setGenes] = useState([]);
@@ -56,6 +85,8 @@ function AnnotationForm(props) {
   const [pathways, setPathways] = useState(["reactome"]);
   const [includeSmallMolecules, setIncludeSmallMolecules] = useState(false);
   const [includeProtiens, setIncludeProtiens] = useState(true);
+  const [includeCov, setIncludeCov] = useState(true);
+
   const [annotatePathwayWithBiogrid, setAnnotatePathwayWithBiogrid] = useState(
     false
   );
@@ -146,6 +177,11 @@ function AnnotationForm(props) {
         const int = new Filter();
         int.setFilter("interaction");
         int.setValue(includeProtiens ? "Proteins" : "Genes");
+
+        const cov = new Filter();
+        cov.setFilter("exclude-orgs");
+        cov.setValue(includeCov ? "" : "2697049");
+
         const coding = new Filter();
         coding.setFilter("coding");
         coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
@@ -154,7 +190,7 @@ function AnnotationForm(props) {
         noncoding.setValue(
           capitalizeFirstLetter(includeNoncodingRNA.toString())
         );
-        annotation.setFiltersList([int, coding, noncoding]);
+        annotation.setFiltersList([int, coding, noncoding, cov]);
       }
       return annotation;
     });
@@ -270,7 +306,11 @@ function AnnotationForm(props) {
               <Input
                 ref={geneInputRef}
                 size="large"
-                placeholder="Enter gene name and hit enter"
+                placeholder={
+                  genes.length
+                    ? "SARS-CoV-2 geens are now supported"
+                    : "Enter gene name and hit enter"
+                }
                 onPressEnter={addGene}
               />
             </Tabs.TabPane>
@@ -299,7 +339,7 @@ function AnnotationForm(props) {
             {genes.map((g) => (
               <Tag
                 closable
-                color="purple"
+                color={virusGenes.includes(g) ? "purple" : "blue"}
                 key={g}
                 onClose={() => {
                   setGenes(genes.filter((f) => f !== g));
@@ -421,7 +461,10 @@ function AnnotationForm(props) {
             </div>
           </div>
 
-          <div className="parameter" style={{ marginTop: 45 }}>
+          <span className="title" style={{ marginTop: 30 }}>
+            Protiens
+          </span>
+          <div className="parameter">
             <Switch
               defaultChecked={includeProtiens}
               onChange={setIncludeProtiens}
@@ -429,6 +472,16 @@ function AnnotationForm(props) {
             {"  "}
             <div className="label">Include protiens</div>
           </div>
+
+          <span className="title" style={{ marginTop: 30 }}>
+            SARS-CoV-2
+          </span>
+          <div className="parameter">
+            <Switch defaultChecked={includeCov} onChange={setIncludeCov} />
+            {"  "}
+            <div className="label">Include SARS-CoV-2</div>
+          </div>
+
           {annotatePathwayWithBiogrid && (
             <Alert
               type="warning"
