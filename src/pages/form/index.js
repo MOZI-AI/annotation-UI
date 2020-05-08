@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Typography,
   Tabs,
@@ -102,13 +102,21 @@ function AnnotationForm(props) {
   const [includeCodingRNA, setIncludeCodingRNA] = useState(false);
   const [includeNoncodingRNA, setIncludeNoncodingRNA] = useState(false);
 
-  const addGene = (e) => {
-    const gene = e.target.value.trim().toUpperCase().split(" ");
-    gene.some((g) => genes.includes(g))
-      ? message.warn("Gene already exists!")
-      : setGenes([...genes, ...gene]);
-    geneInputRef.current.setValue("");
-  };
+  const addGene = useCallback(
+    (e) => {
+      setGenes((gns) => {
+        const gene = e.trim().toUpperCase().split(" ");
+        if (gene.some((g) => gns.includes(g))) {
+          message.warn("Gene already exists!");
+          return gns;
+        } else {
+          return [...gns, ...gene];
+        }
+      });
+      geneInputRef.current.setValue("");
+    },
+    [genes]
+  );
 
   const toggleAnnotation = (annotation, e) => {
     const updated = e.target.checked
@@ -233,7 +241,7 @@ function AnnotationForm(props) {
 
           if (Array.isArray(error)) {
             const invalidGenes = error.map((g) => g.symbol);
-            setGenes(genes.filter((g) => !invalidGenes.includes(g)));
+            setGenes((gns) => gns.filter((g) => !invalidGenes.includes(g)));
             notification.warning({
               message: (
                 <Typography.Title level={4}>Gene not found</Typography.Title>
@@ -245,7 +253,10 @@ function AnnotationForm(props) {
                     .map((g) => (
                       <p key={g.symbol}>
                         Symbol for gene <Tag color="red">{g.symbol}</Tag> has
-                        changed to <Tag color="green">{g.current}</Tag>
+                        changed to{" "}
+                        <Tag color="green" onClick={() => addGene(g.current)}>
+                          {g.current}
+                        </Tag>
                       </p>
                     ))}
                   {error
@@ -258,12 +269,21 @@ function AnnotationForm(props) {
                           <Tag
                             key={s}
                             color="green"
+                            onClick={() => addGene(s)}
                             // style={{ fontSize: "1.1rem" }}
                           >
                             {s}
                           </Tag>
                         ))}
                         ?
+                      </p>
+                    ))}
+                  {error
+                    .filter((e) => !e.current && !e.similar.length)
+                    .map((g) => (
+                      <p key={g}>
+                        <Tag color="red">{g.symbol}</Tag> does not exist in the
+                        atomespace
                       </p>
                     ))}
                 </div>
@@ -311,7 +331,7 @@ function AnnotationForm(props) {
                     ? "SARS-CoV-2 geens are now supported"
                     : "Enter gene name and hit enter"
                 }
-                onPressEnter={addGene}
+                onPressEnter={(e) => addGene(e.target.value)}
               />
             </Tabs.TabPane>
             <Tabs.TabPane tab="Import from file" key={GeneInputMethods.Import}>
