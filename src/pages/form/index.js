@@ -247,7 +247,7 @@ function AnnotationForm(props) {
                 <Typography.Title level={4}>Gene not found</Typography.Title>
               ),
               description: (
-                <div>
+                <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
                   {error
                     .filter((e) => e.current !== "")
                     .map((g) => (
