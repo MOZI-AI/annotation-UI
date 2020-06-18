@@ -8,7 +8,7 @@ import {
   Icon,
   Tabs,
   Modal,
-  Table
+  Table,
 } from "antd";
 import { parse, distanceInWordsToNow } from "date-fns";
 import { RESULT_ADDR, downloadSchemeFile } from "../../service";
@@ -19,11 +19,11 @@ import sessionNotFound from "../../assets/session-not-found.svg";
 import "./style.css";
 const width = document.body.clientWidth || window.screen.width;
 
-export const AnnotationStatus = {
-  ACTIVE: 1,
-  COMPLETED: 2,
-  ERROR: -1
-};
+// export const AnnotationStatus = {
+//   ACTIVE: 1,
+//   COMPLETED: 2,
+//   ERROR: -1
+// };
 
 function AnnotationResult(props) {
   const [response, setResponse] = useState(undefined);
@@ -31,75 +31,65 @@ function AnnotationResult(props) {
   const [isFetchingResult, setFetchingResult] = useState(false);
   const [summary, setSummary] = useState(undefined);
   const [isSummaryShown, setSummaryShown] = useState(false);
-  const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
+  // const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
   const id = props.match.params.id;
 
   useEffect(() => {
     if (id) {
       setFetchingResult(true);
-      fetch(`${RESULT_ADDR}/status/${id}`)
-        .then(res => res.json())
-        .then(res => {
-          if (res.status === 2)
-            return fetch(`${RESULT_ADDR}/${id}`)
-              .then(res => res.json())
-              .then(result => {
-                setFetchingResult(false);
-                setResponse(Object.assign({}, res, { result }));
-              });
+      fetch(`${RESULT_ADDR}/${id}`)
+        .then((res) => res.json())
+        .then((result) => {
           setFetchingResult(false);
-          setResponse({
-            status: AnnotationStatus.ERROR,
-            statusMessage: res.response
-          });
+          setResponse({ result });
         });
     }
   }, []);
 
-  const fetchTableData = fileName => {
+  const fetchTableData = (fileName) => {
     fetch(
       `${RESULT_ADDR}/csv_file/${id}/${fileName.substr(0, fileName.length - 4)}`
-    ).then(data => {
+    ).then((data) => {
       const res = Object.assign({}, response);
       data
         .clone()
         .text()
-        .then(text => {
-          res.csv_files.find(f => f.fileName === fileName).data = text;
+        .then((text) => {
+          res.csv_files.find((f) => f.fileName === fileName).data = text;
           setResponse(res);
         });
     });
   };
 
-  const renderActive = () => (
-    <Alert
-      type="info"
-      message="The annotation task is still processing, refresh the page to check again."
-      showIcon
-    />
-  );
+  // const renderActive = () => (
+  //   <Alert
+  //     type="info"
+  //     message="The annotation task is still processing, refresh the page to check again."
+  //     showIcon
+  //   />
+  // );
 
-  const renderError = () => (
-    <Fragment>
-      <img src={sessionNotFound} className="empty-state" />
-      <Typography.Paragraph className="call-to-action">
-        <Alert
-          type="error"
-          message={
-            <span>
-              {
-                <span>
-                  {response.statusMessage}. Try to
-                  <Link to="/"> run another annotation</Link>
-                </span>
-              }
-            </span>
-          }
-          showIcon
-        />
-      </Typography.Paragraph>
-    </Fragment>
-  );
+  // const renderError = () => (
+  //   <Fragment>
+  //     <img src={sessionNotFound} className="empty-state" />
+  //     <Typography.Paragraph className="call-to-action">
+  //       <Alert
+  //         type="error"
+  //         message={
+  //           <span>
+  //             {
+  //               <span>
+  //                 {response.statusMessage}. Try to
+  //                 <Link to="/"> run another annotation</Link>
+  //               </span>
+  //             }
+  //           </span>
+  //         }
+  //         showIcon
+  //       />
+  //     </Typography.Paragraph>
+  //   </Fragment>
+  // );
 
   const renderComplete = () => {
     const { nodes, edges } = response.result.elements;
@@ -114,13 +104,13 @@ function AnnotationResult(props) {
         </p>
         <div className="inline-buttons">
           <Button
-            onClick={e => {
+            onClick={(e) => {
               if (!summary) {
-                fetch(`${RESULT_ADDR}/summary/${id}`).then(data => {
+                fetch(`${RESULT_ADDR}/summary/${id}`).then((data) => {
                   data
                     .clone()
                     .text()
-                    .then(t => {
+                    .then((t) => {
                       setSummary(JSON.parse(t));
                     });
                 });
@@ -131,7 +121,9 @@ function AnnotationResult(props) {
             View summary
           </Button>
 
-          <Button onClick={e => setTableShown(true)}>View results table</Button>
+          <Button onClick={(e) => setTableShown(true)}>
+            View results table
+          </Button>
           <Button onClick={() => downloadSchemeFile(props.match.params.id)}>
             Download Scheme File
           </Button>
@@ -151,7 +143,7 @@ function AnnotationResult(props) {
     );
   };
 
-  const renderSummaryTable = tableData => {
+  const renderSummaryTable = (tableData) => {
     const rows = Object.values(tableData).reduce(
       (acc, v) => ({ ...acc, ...v[0] }),
       {}
@@ -163,8 +155,8 @@ function AnnotationResult(props) {
           ...Object.keys(rows).map((r, i) => ({
             title: r.split("_").join(" "),
             dataIndex: `col${i}`,
-            key: `col${i}`
-          }))
+            key: `col${i}`,
+          })),
         ]}
         dataSource={[
           ...Object.keys(tableData).map((k, i) => ({
@@ -173,17 +165,17 @@ function AnnotationResult(props) {
             ...Object.keys(rows).reduce(
               (acc, cur, i) => ({
                 ...acc,
-                [`col${i}`]: tableData[k][0][cur] || "-"
+                [`col${i}`]: tableData[k][0][cur] || "-",
               }),
               {}
-            )
-          }))
+            ),
+          })),
         ]}
       />
     );
   };
 
-  const renderSummary = data => (
+  const renderSummary = (data) => (
     <Modal
       visible={true}
       onCancel={() => setSummaryShown(false)}
@@ -239,15 +231,16 @@ function AnnotationResult(props) {
       {/* Logo and title */}
       <div className="landing-page container">
         <Header />
-        {response && response.status === COMPLETED && renderComplete()}
+        {/* {response && response.status === COMPLETED && renderComplete()}
         {response && response.status === ACTIVE && renderActive()}
-        {response && response.status === ERROR && renderError()}
+        {response && response.status === ERROR && renderError()} */}
         {/* Show loader if there is a request being processed */}
         {isFetchingResult && (
           <div className="spin-wrapper">
             <Spin /> Fetching results ...
           </div>
         )}
+        {!isFetchingResult && response && renderComplete()}
       </div>
       {/* Show the visualizer */}
       <Router>
