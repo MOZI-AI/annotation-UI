@@ -6,8 +6,12 @@ export const RESULT_ADDR = process.env.RESULT_ADDR
   ? process.env.RESULT_ADDR
   : "http://localhost:3002";
 
-export const downloadSchemeFile = id => {
+export const downloadSchemeFile = (id) => {
   window.open(`${RESULT_ADDR}/result_file/${id}`);
+};
+
+export const downloadCSVfiles = (id) => {
+  window.open(`${RESULT_ADDR}/csv/${id}`);
 };
 
 export const downloadCSVFile = (id, annotation) => {
@@ -19,6 +23,6 @@ export const downloadCSVFile = (id, annotation) => {
   );
 };
 
-export const capitalizeFirstLetter = string => {
+export const capitalizeFirstLetter = (string) => {
   return string[0].toUpperCase() + string.slice(1);
 };
