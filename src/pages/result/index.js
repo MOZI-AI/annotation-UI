@@ -257,7 +257,7 @@ function AnnotationResult(props) {
                 graph={{ ...response.result.elements }}
                 annotations={response.result.elements.nodes
                   .reduce(
-                    (acc, n) => [...acc, ...n.data.group, n.data.subgroup],
+                    (acc, n) => [...acc, ...n.data.group],
                     []
                   )
                   .filter((a, i, self) => a && self.indexOf(a) === i)}

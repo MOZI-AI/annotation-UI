@@ -84,7 +84,7 @@ function AnnotationForm(props) {
   const [parents, setParents] = useState(0);
   const [pathways, setPathways] = useState(["reactome"]);
   const [includeSmallMolecules, setIncludeSmallMolecules] = useState(false);
-  const [includeProtiens, setIncludeProtiens] = useState(true);
+  const [geneLevel, setGeneLevel] = useState(false);
   const [includeCov, setIncludeCov] = useState(true);
 
   const [annotatePathwayWithBiogrid, setAnnotatePathwayWithBiogrid] = useState(
@@ -156,8 +156,8 @@ function AnnotationForm(props) {
       annotation.setFunctionname(sa);
       if (sa === "gene-go-annotation") {
         const ip = new Filter();
-        ip.setFilter("protein");
-        ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
+        ip.setFilter("gene-level?");
+        ip.setValue(capitalizeFirstLetter(geneLevel.toString()));
         annotation.setFiltersList([namespace, nop, ip]);
       } else if (sa === "gene-pathway-annotation") {
         const ps = new Filter();
@@ -167,8 +167,8 @@ function AnnotationForm(props) {
         ism.setFilter("include_sm");
         ism.setValue(capitalizeFirstLetter(includeSmallMolecules.toString()));
         const ip = new Filter();
-        ip.setFilter("include_prot");
-        ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
+        ip.setFilter("gene-level?");
+        ip.setValue(capitalizeFirstLetter(geneLevel.toString()));
         const capb = new Filter();
         capb.setFilter("biogrid");
         capb.setValue(annotatePathwayWithBiogrid ? "1" : "0");
@@ -182,10 +182,6 @@ function AnnotationForm(props) {
         );
         annotation.setFiltersList([ps, ip, ism, capb, coding, noncoding]);
       } else if (sa === "biogrid-interaction-annotation") {
-        const int = new Filter();
-        int.setFilter("interaction");
-        int.setValue(includeProtiens ? "Proteins" : "Genes");
-
         const cov = new Filter();
         cov.setFilter("exclude-orgs");
         cov.setValue(includeCov ? "" : "2697049");
@@ -198,7 +194,7 @@ function AnnotationForm(props) {
         noncoding.setValue(
           capitalizeFirstLetter(includeNoncodingRNA.toString())
         );
-        annotation.setFiltersList([int, coding, noncoding, cov]);
+        annotation.setFiltersList([coding, noncoding, cov]);
       }
       return annotation;
     });
@@ -212,7 +208,7 @@ function AnnotationForm(props) {
     noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
     const protein = new Filter();
     protein.setFilter("protein");
-    protein.setValue(includeProtiens ? "1" : "0");
+    protein.setValue(geneLevel ? "1" : "0");
     includeRNA.setFiltersList([coding, noncoding, protein]);
     annotationRequest.setAnnotationsList(
       includeCodingRNA || includeNoncodingRNA
@@ -482,15 +478,14 @@ function AnnotationForm(props) {
           </div>
 
           <span className="title" style={{ marginTop: 30 }}>
-            Protiens
           </span>
           <div className="parameter">
             <Switch
-              defaultChecked={includeProtiens}
-              onChange={setIncludeProtiens}
+              defaultChecked={geneLevel}
+              onChange={setGeneLevel}
             />
             {"  "}
-            <div className="label">Include protiens</div>
+            <div className="label">Gene Only</div>
           </div>
 
           <span className="title" style={{ marginTop: 30 }}>
