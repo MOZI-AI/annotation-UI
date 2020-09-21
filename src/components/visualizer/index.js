@@ -26,20 +26,21 @@ const contextMenus = require("cytoscape-context-menus");
 contextMenus(cytoscape, $);
 
 import "./style.css";
+import {capitalizeFirstLetter} from "../../service";
 
 const AnnotationGroups = [
   {
     group: "gene-go-annotation",
     subgroups: [
-      { type: "cellularcomponent", color: "#F57C00" },
-      { type: "molecularfunction", color: "#F1C40F" },
-      { type: "biologicalprocess", color: "#8BC34A" }
+      { subgroups: "cellular_component", color: "#F57C00" },
+      { subgroups: "molecular_function", color: "#F1C40F" },
+      { subgroups: "biological_process", color: "#8BC34A" }
     ]
   },
   {
     group: "gene-pathway-annotation",
     color: "#9B59B6",
-    subgroups: [{ type: "reactome" }]
+    subgroups: [{ subgroups: "reactome" }]
   },
   {
     group: "biogrid-interaction-annotation",
@@ -148,10 +149,10 @@ function Visualizer(props) {
   const [isDrawerOpen, setDrawerOpen] = useState(true);
   const [nodeTypes, setNodeTypes] = useState(
     props.graph.nodes
-      .map(n => n.data.subgroup)
+      .map(n => n.data.type)
       .filter((s, i, arr) => {
         return (
-          arr.indexOf(s) === i && ["Genes", "Uniprot", "ChEBI"].includes(s)
+          arr.indexOf(s) === i && ["gene", "uniprot", "chebi", "reactome"].includes(s)
         );
       })
   );
@@ -426,16 +427,16 @@ function Visualizer(props) {
   const toggleAnnotationVisibility = visibleAnnotations => {
     const { nodes, edges } = props.graph;
     const visibleNodes = nodes.filter(n => {
-      const { group, subgroup } = n.data;
+      const { group, type } = n.data;
       return (
         visibleAnnotations.some(a => {
           const [g, sg] = a.split("%");
           return (
             group.includes(g) &&
-            (["Genes", "Uniprot", "ChEBI"].includes(subgroup)
-              ? visibleNodeTypes.includes(subgroup)
+            (["gene", "uniprot", "chebi"].includes(type)
+              ? visibleNodeTypes.includes(type)
               : sg
-              ? sg === subgroup
+              ? sg === type
               : true)
           );
         }) || group.includes("main")
@@ -632,7 +633,7 @@ function Visualizer(props) {
                 checkable
               >
                 {nodeTypes.map(n => (
-                  <Tree.TreeNode key={n} title={n} />
+                  <Tree.TreeNode key={n} title={capitalizeFirstLetter(n)} />
                 ))}
               </Tree>
             </Collapse.Panel>
