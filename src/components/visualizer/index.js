@@ -31,15 +31,15 @@ const AnnotationGroups = [
   {
     group: "gene-go-annotation",
     subgroups: [
-      { subgroup: "cellular_component", color: "#F57C00" },
-      { subgroup: "molecular_function", color: "#F1C40F" },
-      { subgroup: "biological_process", color: "#8BC34A" }
+      { type: "cellularcomponent", color: "#F57C00" },
+      { type: "molecularfunction", color: "#F1C40F" },
+      { type: "biologicalprocess", color: "#8BC34A" }
     ]
   },
   {
     group: "gene-pathway-annotation",
     color: "#9B59B6",
-    subgroups: [{ subgroup: "Reactome" }]
+    subgroups: [{ type: "reactome" }]
   },
   {
     group: "biogrid-interaction-annotation",
@@ -94,11 +94,11 @@ const CYTOSCAPE_STYLE = [
     }
   },
   {
-    selector: 'node[subgroup="Uniprot"]',
+    selector: 'node[type="uniprot"]',
     css: { shape: "hexagon" }
   },
   {
-    selector: 'node[subgroup="ChEBI"]',
+    selector: 'node[type="chebi"]',
     css: {
       shape: "diamond",
       height: 75
