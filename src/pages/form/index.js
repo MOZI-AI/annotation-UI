@@ -4,8 +4,8 @@ import {
   Tabs,
   Input,
   Upload,
-  Icon,
   Checkbox,
+  Select,
   Switch,
   InputNumber,
   Tag,
@@ -16,6 +16,7 @@ import {
   notification,
   Alert,
 } from "antd";
+import {CheckOutlined, InboxOutlined} from "@ant-design/icons"
 import Header from "../../components/header";
 import { Annotate } from "../../proto/annotation_pb_service";
 import { grpc } from "grpc-web-client";
@@ -28,6 +29,7 @@ import {
 import { GRPC_ADDR, capitalizeFirstLetter } from "../../service";
 import "./style.css";
 
+const {Option} = Select;
 const GeneGoOptions = [
   { label: "Biological Process", value: "biological_process" },
   { label: "Cellular Component", value: "cellular_component" },
@@ -47,7 +49,6 @@ const Pathways = [
 ];
 
 const GeneInputMethods = { Manual: "manual", Import: "import" };
-
 const virusGenes = [
   "NSP1",
   "NSP7",
@@ -76,7 +77,8 @@ const virusGenes = [
   "NSP11",
   "NSP15",
 ];
-
+const stringInters = ["binding", "reaction", "inhibition",
+      "activation", "expression", "catalysis", "ptmod"]
 function AnnotationForm(props) {
   const geneInputRef = React.createRef();
   const [genes, setGenes] = useState([]);
@@ -96,6 +98,7 @@ function AnnotationForm(props) {
     "cellular_component",
     "molecular_function",
   ]);
+  const [stringInteractions, setStringInteractions] = useState(["binding", "reaction"])
   const [geneInputMethod, setGeneInputMethod] = useState(
     GeneInputMethods.Manual
   );
@@ -151,14 +154,15 @@ function AnnotationForm(props) {
     const nop = new Filter();
     nop.setFilter("parents");
     nop.setValue(parents.toString());
+     const gl = new Filter();
+    gl.setFilter("gene-level?");
+    gl.setValue(capitalizeFirstLetter(geneLevel.toString()));
     const annList = annotations.map((sa) => {
       const annotation = new Annotation();
       annotation.setFunctionname(sa);
       if (sa === "gene-go-annotation") {
         const ip = new Filter();
-        ip.setFilter("gene-level?");
-        ip.setValue(capitalizeFirstLetter(geneLevel.toString()));
-        annotation.setFiltersList([namespace, nop, ip]);
+        annotation.setFiltersList([namespace, nop, gl]);
       } else if (sa === "gene-pathway-annotation") {
         const ps = new Filter();
         ps.setFilter("pathway");
@@ -166,9 +170,6 @@ function AnnotationForm(props) {
         const ism = new Filter();
         ism.setFilter("include_sm");
         ism.setValue(capitalizeFirstLetter(includeSmallMolecules.toString()));
-        const ip = new Filter();
-        ip.setFilter("gene-level?");
-        ip.setValue(capitalizeFirstLetter(geneLevel.toString()));
         const capb = new Filter();
         capb.setFilter("biogrid");
         capb.setValue(annotatePathwayWithBiogrid ? "1" : "0");
@@ -180,7 +181,20 @@ function AnnotationForm(props) {
         noncoding.setValue(
           capitalizeFirstLetter(includeNoncodingRNA.toString())
         );
-        annotation.setFiltersList([ps, ip, ism, capb, coding, noncoding]);
+        annotation.setFiltersList([ps, gl, ism, capb, coding, noncoding]);
+      } else if(sa === "string-interaction-annotation"){
+        const str = new Filter()
+        str.setFilter("interactions")
+        str.setValue(stringInteractions.length > 0 ? stringInteractions.join(" ") : "False");
+        const coding = new Filter();
+        coding.setFilter("coding");
+        coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
+        const noncoding = new Filter();
+        noncoding.setFilter("noncoding");
+        noncoding.setValue(
+          capitalizeFirstLetter(includeNoncodingRNA.toString())
+        );
+        annotation.setFiltersList([str, gl, coding, noncoding]);
       } else if (sa === "biogrid-interaction-annotation") {
         const cov = new Filter();
         cov.setFilter("exclude-orgs");
@@ -207,9 +221,7 @@ function AnnotationForm(props) {
     noncoding.setFilter("noncoding");
     noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
     const protein = new Filter();
-    protein.setFilter("protein");
-    protein.setValue(geneLevel ? "1" : "0");
-    includeRNA.setFiltersList([coding, noncoding, protein]);
+    includeRNA.setFiltersList([gl, coding, noncoding]);
     annotationRequest.setAnnotationsList(
       includeCodingRNA || includeNoncodingRNA
         ? [...annList, includeRNA]
@@ -340,7 +352,7 @@ function AnnotationForm(props) {
                 previewFile={(file) => null}
               >
                 <p className="ant-upload-drag-icon">
-                  <Icon type="inbox" />
+                  <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">
                   Click or drag file to this area to import gene list
@@ -443,11 +455,31 @@ function AnnotationForm(props) {
             </li>
             <li>
               <Checkbox
+                  onChange={(e) => toggleAnnotation("string-interaction-annotation", e)}>
+                <a href="https://string-db.org/" target="_blank">
+                  STRING Protein Interaction
+                </a>
+              </Checkbox>
+                {annotations.includes("string-interaction-annotation") && (
+                    <div className="annotation-parameters">
+                      <div className="label">Interaction types:</div>
+                      <div className="parameter">
+                        <Select mode="multiple" style={{width : '100%'}} defaultValue={stringInteractions} placeholder="interactions" onChange={setStringInteractions}>
+                          {stringInters.map((inter, index) => {
+                            return <Option key={inter}>{inter}</Option>
+                          })}
+                        </Select>
+                      </div>
+                    </div>
+                )}
+            </li>
+            <li>
+              <Checkbox
                 onChange={(e) =>
                   toggleAnnotation("biogrid-interaction-annotation", e)
                 }
               >
-                Biogrid Protien Interaction
+                Biogrid Gene Interaction
               </Checkbox>
             </li>
           </ul>
@@ -508,7 +540,7 @@ function AnnotationForm(props) {
           <div className="actions">
             <Button
               type="primary"
-              icon="check"
+              icon={<CheckOutlined/>}
               disabled={!annotations.length || !genes.length}
               onClick={handleSubmit}
               loading={loading}
