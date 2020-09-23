@@ -9,12 +9,17 @@ import {
   Spin,
   Typography,
   Drawer,
-  Icon
 } from "antd";
+import {FilterFilled, FilterOutlined, FilterTwoTone,
+  SwapOutlined, StarOutlined, PlayCircleOutlined,
+  GoldOutlined, CloseOutlined, CameraOutlined,
+  DownloadOutlined, InfoCircleOutlined} from "@ant-design/icons"
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
 import filterSvg from "../../assets/filter.svg";
 import copySvg from "../../assets/copy.svg";
+import "./style.css";
+import {capitalizeFirstLetter} from "../../service";
 
 import "cytoscape-context-menus/cytoscape-context-menus.css";
 import $ from "jquery";
@@ -25,31 +30,33 @@ const cola = require("cytoscape-cola");
 const contextMenus = require("cytoscape-context-menus");
 contextMenus(cytoscape, $);
 
-import "./style.css";
-import {capitalizeFirstLetter} from "../../service";
-
 const AnnotationGroups = [
   {
     group: "gene-go-annotation",
     subgroups: [
-      { subgroups: "cellular_component", color: "#F57C00" },
-      { subgroups: "molecular_function", color: "#F1C40F" },
-      { subgroups: "biological_process", color: "#8BC34A" }
+      { name: "cellularcomponent", color: "#F57C00" },
+      { name: "molecularfunction", color: "#F1C40F" },
+      { name: "biologicalprocess", color: "#8BC34A" }
     ]
   },
   {
     group: "gene-pathway-annotation",
     color: "#9B59B6",
-    subgroups: [{ subgroups: "reactome" }]
+    subgroups: [{ name: "reactome" }, {"name": "smp"}]
   },
   {
     group: "biogrid-interaction-annotation",
-    color: "#3498DB",
+    color: "#1f92e0",
     subgroups: []
   },
   {
     group: "rna-annotation",
     color: "#eb2f96",
+    subgroups: []
+  },
+  {
+    group: "string-interaction-annotation",
+    color: "#2fdbeb",
     subgroups: []
   }
 ];
@@ -87,7 +94,7 @@ const CYTOSCAPE_STYLE = [
     }
   },
   {
-    selector: n => n.data().subgroup === "Genes",
+    selector: n => n.data().type === "gene",
     style: {
       shape: "ellipse",
       height: 75,
@@ -152,7 +159,7 @@ function Visualizer(props) {
       .map(n => n.data.type)
       .filter((s, i, arr) => {
         return (
-          arr.indexOf(s) === i && ["gene", "uniprot", "chebi", "reactome"].includes(s)
+          arr.indexOf(s) === i && ["gene", "uniprot", "chebi"].includes(s)
         );
       })
   );
@@ -170,6 +177,7 @@ function Visualizer(props) {
     "gene-go-annotation%",
     "gene-pathway-annotation%",
     "biogrid-interaction-annotation%",
+    "string-interaction-annotation%",
     "rna-annotation%"
   ]);
   const [selectedNode, setSelectedNode] = useState({
@@ -433,7 +441,7 @@ function Visualizer(props) {
           const [g, sg] = a.split("%");
           return (
             group.includes(g) &&
-            (["gene", "uniprot", "chebi"].includes(type)
+            (["gene", "uniprot", "chebi", "reactome"].includes(type)
               ? visibleNodeTypes.includes(type)
               : sg
               ? sg === type
@@ -468,7 +476,7 @@ function Visualizer(props) {
       ? nodes.filter(n => n.data.group.includes(group))
       : nodes;
     filteredNodes = subgroup
-      ? filteredNodes.filter(n => n.data.subgroup === subgroup)
+      ? filteredNodes.filter(n => n.data.type === subgroup)
       : filteredNodes;
     return (filteredNodes.length * 100) / nodes.length;
   };
@@ -479,7 +487,7 @@ function Visualizer(props) {
         return {
           selector: n =>
             n.data().group.includes(annotation.group) &&
-            n.data().subgroup === sg.subgroup,
+            n.data().type === sg.name,
           style: {
             "background-color": annotation.color || sg.color,
             "text-outline-color": annotation.color || sg.color
@@ -558,7 +566,6 @@ function Visualizer(props) {
       </div>
     );
   };
-
   const renderDescriptionBox = (title, content) => {
     return (
       <div className="description-wrapper">
@@ -573,7 +580,7 @@ function Visualizer(props) {
       <div className="filter-controls">
         <Tooltip placement="bottom" title="Remove Filter">
           <Button
-            icon="close"
+            icon={<CloseOutlined />}
             size="large"
             onClick={clearFilter}
             type="danger"
@@ -596,6 +603,21 @@ function Visualizer(props) {
 
   return (
     <Fragment>
+      <Button
+          size="large"
+          type="primary"
+          style={{
+            position: "absolute",
+            top:80,
+            right: isDrawerOpen ? 360 : 10,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+            boxShadow: "-2px 0 8px rgba(0,0,0,.15)",
+            zIndex:99
+          }}
+          icon={<FilterOutlined />}
+          onClick={(e) => setDrawerOpen(true)}
+        />
       <Drawer
         title="Apply filters"
         placement="right"
@@ -604,20 +626,6 @@ function Visualizer(props) {
         visible={isDrawerOpen}
         width={360}
       >
-        <Button
-          size="large"
-          type="primary"
-          style={{
-            position: "absolute",
-            right: 360,
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
-            boxShadow: "-2px 0 8px rgba(0,0,0,.15)"
-          }}
-          onClick={() => setDrawerOpen(true)}
-        >
-          <Icon type="filter" theme={isDrawerOpen ? "filled" : null} />
-        </Button>
         <div className="annotation-toggle-wrapper">
           <Input.Search
             placeholder="Node ID"
@@ -631,11 +639,9 @@ function Visualizer(props) {
                 defaultCheckedKeys={nodeTypes}
                 onCheck={setVisibleNodeTypes}
                 checkable
-              >
-                {nodeTypes.map(n => (
-                  <Tree.TreeNode key={n} title={capitalizeFirstLetter(n)} />
-                ))}
-              </Tree>
+                treeData={nodeTypes.map(n => (
+                    {key: n, title:capitalizeFirstLetter(n)}
+                ))}/>
             </Collapse.Panel>
           </Collapse>
           <Collapse bordered={false} defaultActiveKey={["types"]}>
@@ -644,11 +650,8 @@ function Visualizer(props) {
                 defaultCheckedKeys={linkTypes}
                 onCheck={setVisibleLinkTypes}
                 checkable
-              >
-                {linkTypes.map(n => (
-                  <Tree.TreeNode key={n} title={n} />
-                ))}
-              </Tree>
+                treeData={linkTypes.map(n => (
+                    {title: n, key: n}))}/>
             </Collapse.Panel>
           </Collapse>
           <Collapse bordered={false} defaultActiveKey={["annotation"]}>
@@ -658,43 +661,28 @@ function Visualizer(props) {
                 defaultCheckedKeys={visibleAnnotations}
                 onCheck={setVisibleAnnotations}
                 checkable
-              >
-                {AnnotationGroups.filter(a =>
-                  props.annotations.includes(a.group)
-                ).map((a, i) => {
-                  return (
-                    <Tree.TreeNode
-                      key={`${a.group}%`}
-                      title={
-                        <span>
-                          {a.group}
-                          {renderProgressBar(
-                            getAnnotationPercentage(a.group),
-                            a.color || "#565656"
-                          )}
-                        </span>
-                      }
-                    >
-                      {a.subgroups
-                        .filter(s => props.annotations.includes(s.subgroup))
-                        .map(s => (
-                          <Tree.TreeNode
-                            key={`${a.group}%${s.subgroup}`}
-                            title={
-                              <span>
-                                {s.subgroup}
-                                {renderProgressBar(
-                                  getAnnotationPercentage(a.group, s.subgroup),
-                                  a.color || s.color
-                                )}
-                              </span>
-                            }
-                          />
-                        ))}
-                    </Tree.TreeNode>
-                  );
-                })}
-              </Tree>
+                treeData={AnnotationGroups.filter(a => props.annotations.includes(a.group))
+                        .map((a, i) => (
+                            {key: `${a.group}%`, title:
+                                <span>
+                                  {a.group}
+                                  {renderProgressBar(
+                                    getAnnotationPercentage(a.group),
+                                    a.color || "#565656"
+                                  )}
+                                </span>,
+                              children: a.subgroups
+                                .filter(s => props.annotations.includes(s.name))
+                                .map(s => (
+                                    {key: `${a.group}%${s.name}`, title:
+                                    <span>
+                                        {s.name}
+                                        {renderProgressBar(
+                                          getAnnotationPercentage(a.group, s.name),
+                                          a.color || s.color
+                                        )}
+                                      </span>}
+                                ))}))}/>
             </Collapse.Panel>
           </Collapse>
         </div>
@@ -704,22 +692,22 @@ function Visualizer(props) {
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
         <Tooltip placement="right" title="Randomize layout">
-          <Button size="large" icon="swap" onClick={randomLayout} />
+          <Button size="large" icon={<SwapOutlined />} onClick={randomLayout} />
         </Tooltip>
         <Tooltip placement="right" title="Multi-level layout">
-          <Button size="large" icon="star" onClick={coseLayout} />
+          <Button size="large" icon={<StarOutlined />} onClick={coseLayout} />
         </Tooltip>
         <Tooltip placement="right" title="Breadth-first layout">
-          <Button size="large" icon="gold" onClick={breadthFirstLayout} />
+          <Button size="large" icon={<GoldOutlined />} onClick={breadthFirstLayout} />
         </Tooltip>
         <Tooltip placement="right" title="Concentric layout">
-          <Button size="large" icon="play-circle" onClick={concentricLayout} />
+          <Button size="large" icon={<PlayCircleOutlined />} onClick={concentricLayout} />
         </Tooltip>
         <Tooltip placement="right" title="Save screenshot">
-          <Button size="large" icon="camera" onClick={takeScreenshot} />
+          <Button size="large" icon={<CameraOutlined />} onClick={takeScreenshot} />
         </Tooltip>
         <Tooltip placement="right" title="Download graph as JSON">
-          <Button size="large" icon="share-alt" onClick={downloadGraphJSON} />
+          <Button size="large" icon={<DownloadOutlined />} onClick={downloadGraphJSON} />
         </Tooltip>
         <Tooltip
           placement="right"
@@ -737,7 +725,7 @@ function Visualizer(props) {
             </div>
           }
         >
-          <Button size="large" icon="info-circle" />
+          <Button size="large" icon={<InfoCircleOutlined/>} />
         </Tooltip>
       </div>
 

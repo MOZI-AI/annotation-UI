@@ -5,12 +5,11 @@ import {
   Alert,
   Spin,
   Typography,
-  Icon,
   Tabs,
   Modal,
   Table,
 } from "antd";
-import { parse, distanceInWordsToNow } from "date-fns";
+import {DownloadOutlined, ArrowLeftOutlined} from "@ant-design/icons"
 import {
   RESULT_ADDR,
   downloadSchemeFile,
@@ -139,7 +138,7 @@ function AnnotationResult(props) {
         </div>
         <Typography.Paragraph className="call-to-action">
           <Link to="/">
-            <Icon type="arrow-left" />
+            <ArrowLeftOutlined />
             Run another annotation
           </Link>
         </Typography.Paragraph>
@@ -196,7 +195,7 @@ function AnnotationResult(props) {
             tabBarExtraContent={
               summary && (
                 <Button
-                  icon="download"
+                  icon={<DownloadOutlined/>}
                   onClick={() => {
                     let json = JSON.stringify(summary);
                     const link = document.createElement("a");
@@ -257,7 +256,7 @@ function AnnotationResult(props) {
                 graph={{ ...response.result.elements }}
                 annotations={response.result.elements.nodes
                   .reduce(
-                    (acc, n) => [...acc, ...n.data.group],
+                    (acc, n) => [...acc, ...n.data.group, n.data.type],
                     []
                   )
                   .filter((a, i, self) => a && self.indexOf(a) === i)}
