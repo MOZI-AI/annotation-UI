@@ -58,6 +58,11 @@ const AnnotationGroups = [
     group: "string-interaction-annotation",
     color: "#2fdbeb",
     subgroups: []
+  },
+  {
+    group: "go-annotation",
+    color: "#bf8374",
+    subgroups: []
   }
 ];
 
@@ -159,7 +164,7 @@ function Visualizer(props) {
       .map(n => n.data.type)
       .filter((s, i, arr) => {
         return (
-          arr.indexOf(s) === i && ["gene", "uniprot", "chebi"].includes(s)
+          arr.indexOf(s) === i && ["gene", "uniprot", "chebi", "reactome", "smp"].includes(s)
         );
       })
   );
@@ -178,7 +183,8 @@ function Visualizer(props) {
     "gene-pathway-annotation%",
     "biogrid-interaction-annotation%",
     "string-interaction-annotation%",
-    "rna-annotation%"
+    "rna-annotation%",
+    "go-annotation%"
   ]);
   const [selectedNode, setSelectedNode] = useState({
     node: null,
