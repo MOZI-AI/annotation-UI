@@ -209,6 +209,8 @@ function AnnotationForm(props) {
           capitalizeFirstLetter(includeNoncodingRNA.toString())
         );
         annotation.setFiltersList([coding, noncoding, cov]);
+      } else if (sa === "go-annotation"){
+          annotation.setFiltersList([]);
       }
       return annotation;
     });
@@ -387,7 +389,8 @@ function AnnotationForm(props) {
             )}
           </div>
           {/* Annotations */}
-          <span className="title">Annotations</span>
+          {/*Gene/Protein annotations */}
+          <span className="title">Gene/Protein Annotations</span>
           <ul className="annotation-list">
             <li>
               <Checkbox
@@ -480,6 +483,19 @@ function AnnotationForm(props) {
                 }
               >
                 Biogrid Gene Interaction
+              </Checkbox>
+            </li>
+          </ul>
+
+          {/*Other Annotations*/}
+          <span className="title">Other Annotations</span>
+          <ul className="annotation-list">
+            <li>
+              <Checkbox
+                onChange={(e) => toggleAnnotation("go-annotation", e)}>
+                <a href="http://www.geneontology.org" target="_blank">
+                  GO
+                </a>
               </Checkbox>
             </li>
           </ul>
