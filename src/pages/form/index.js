@@ -83,7 +83,8 @@ function AnnotationForm(props) {
   const geneInputRef = React.createRef();
   const [genes, setGenes] = useState([]);
   const [annotations, setAnnotations] = useState([]);
-  const [parents, setParents] = useState(0);
+  const [geneGOParents, setParents] = useState(0);
+  const [goParents, setGOParents] = useState(1)
   const [pathways, setPathways] = useState(["reactome"]);
   const [includeSmallMolecules, setIncludeSmallMolecules] = useState(false);
   const [geneLevel, setGeneLevel] = useState(false);
@@ -153,7 +154,7 @@ function AnnotationForm(props) {
     namespace.setValue(GOSubgroups.join(" "));
     const nop = new Filter();
     nop.setFilter("parents");
-    nop.setValue(parents.toString());
+    nop.setValue(geneGOParents.toString());
      const gl = new Filter();
     gl.setFilter("gene-level?");
     gl.setValue(capitalizeFirstLetter(geneLevel.toString()));
@@ -210,7 +211,10 @@ function AnnotationForm(props) {
         );
         annotation.setFiltersList([coding, noncoding, cov]);
       } else if (sa === "go-annotation"){
-          annotation.setFiltersList([]);
+          const pars = new Filter();
+          pars.setFilter("parents");
+          pars.setValue(goParents.toString());
+          annotation.setFiltersList([pars]);
       }
       return annotation;
     });
@@ -338,8 +342,8 @@ function AnnotationForm(props) {
                 size="large"
                 placeholder={
                   genes.length
-                    ? "SARS-CoV-2 geens are now supported"
-                    : "Enter gene name and hit enter"
+                    ? "SARS-CoV-2 genes and proteins are now supported"
+                    : "Enter Gene, GO category or Protein name and hit enter"
                 }
                 onPressEnter={(e) => addGene(e.target.value)}
               />
@@ -414,8 +418,8 @@ function AnnotationForm(props) {
                       <div className="label">Number of parents: </div>
                     </Typography.Text>
                     <InputNumber
-                      defaultValue={parents}
-                      min={0}
+                      defaultValue={geneGOParents}
+                      min={1}
                       onChange={setParents}
                     />
                   </div>
@@ -497,6 +501,20 @@ function AnnotationForm(props) {
                   GO
                 </a>
               </Checkbox>
+              {annotations.includes("go-annotation") && (
+                <div className="annotation-parameters">
+                  <div className="parameter">
+                    <Typography.Text>
+                      <div className="label">Number of parents: </div>
+                    </Typography.Text>
+                    <InputNumber
+                      defaultValue={goParents}
+                      min={1}
+                      onChange={setGOParents}
+                    />
+                  </div>
+                </div>
+              )}
             </li>
           </ul>
 
