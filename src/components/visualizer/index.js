@@ -86,7 +86,7 @@ const CYTOSCAPE_STYLE = [
     css: {
       content: "data(id)",
       shape: "round-rectangle",
-      width: "mapData(id.length, 0, 20, 50, 300)",
+      width: "mapData(id.length, 0, 20, 50, 200)",
       height: 40,
       color: "#fff",
       "text-wrap": "wrap",
@@ -170,7 +170,7 @@ function Visualizer(props) {
   );
   const [linkTypes, setLinkTypes] = useState(
     props.graph.edges
-      .map(e => e.data.subgroup)
+      .map(e => e.data.name)
       .filter((s, i, arr) => {
         return arr.indexOf(s) === i;
       })
@@ -457,11 +457,11 @@ function Visualizer(props) {
       );
     });
     const visibleEdges = edges.filter(e => {
-      const { source, target, subgroup } = e.data;
+      const { source, target, name } = e.data;
       return (
         visibleNodes.some(n => n.data.id === source) &&
         visibleNodes.some(n => n.data.id === target) &&
-        visibleLinkTypes.some(s => s === subgroup)
+        visibleLinkTypes.some(s => s === name)
       );
     });
     cy.json({ elements: { nodes: visibleNodes } });

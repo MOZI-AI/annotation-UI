@@ -8,6 +8,7 @@ import PageNotFound from "./pages/page-not-found";
 
 import "antd/dist/antd.min.css";
 import "./style.css";
+import TabbedViz from "./components/tabs";
 
 function App(props) {
   return (
@@ -15,6 +16,7 @@ function App(props) {
       <Switch>
         <Route path="/" exact component={AnnotationForm} />
         <Route path="/result/:id" component={AnnotationResult} />
+        <Route path="/visualizer/:id" component={TabbedViz}/>
         <Route component={PageNotFound} />
       </Switch>
     </Router>

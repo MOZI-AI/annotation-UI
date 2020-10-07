@@ -123,10 +123,15 @@ function AnnotationForm(props) {
   );
 
   const toggleAnnotation = (annotation, e) => {
-    const updated = e.target.checked
+    if(annotation === "biogrid-interaction-annotation" && !geneLevel && e.target.checked){
+      message.error("Genes only must be on before selecting BioGRID");
+      e.target.checked = false;
+    } else {
+      const updated = e.target.checked
       ? [...annotations, annotation]
       : annotations.filter((a) => a !== annotation);
-    setAnnotations(updated);
+     setAnnotations(updated);
+    }
   };
 
   const handleFileUpload = (file) => {
