@@ -9,10 +9,9 @@ import {
   Spin,
   Typography,
   Drawer,
+  AutoComplete
 } from "antd";
-import {FilterFilled, FilterOutlined, FilterTwoTone,
-  SwapOutlined, StarOutlined, PlayCircleOutlined,
-  GoldOutlined, CloseOutlined, CameraOutlined,
+import {FilterOutlined, CloseOutlined, CameraOutlined,
   DownloadOutlined, InfoCircleOutlined} from "@ant-design/icons"
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
@@ -194,6 +193,9 @@ function Visualizer(props) {
     pubmed: null
   });
 
+  const [searchOpts, setSearchOpts] = useState([]);
+  const [searchId, setSearchId] = useState(null);
+
   useEffect(function() {
     setCy(
       cytoscape({
@@ -305,6 +307,14 @@ function Visualizer(props) {
           contextMenuClasses: ["context-menu"]
         };
         setContextMenu(cy.contextMenus(options));
+        console.log("Nodes size: " + cy.nodes().length);
+        cy.batch(() => {
+          setSearchOpts(cy.nodes().map((n) => {
+            return {value: n.data("id"), label: n.data("id")}
+          }));
+        })
+
+        console.log(searchOpts);
       }
     },
     [cy]
@@ -325,6 +335,21 @@ function Visualizer(props) {
     },
     [layout]
   );
+
+  useEffect(function(){
+    if(cy){
+      cy.batch(function() {
+      const selected = cy.nodes(`[id @= "${searchId.toUpperCase()}"]`);
+      if (selected.size()) {
+        selected.select();
+        cy.zoom(2);
+        cy.center(selected);
+      } else {
+        message.warn("No matching results.");
+      }
+    });
+    }
+  } ,[searchId])
 
 
   const takeScreenshot = () => {
@@ -596,11 +621,15 @@ function Visualizer(props) {
         width={360}
       >
         <div className="annotation-toggle-wrapper">
-          <Input.Search
-            placeholder="Node ID"
-            onSearch={search}
-            enterButton
-            style={{ margin: 5, marginBottom: 15 }}
+          <AutoComplete
+            style={{ margin: 5, marginBottom: 15, width: 200 }}
+            placeholder="Type Node ID"
+            options={searchOpts}
+            onSelect={setSearchId}
+            filterOption={(inputValue, option) =>
+              option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+             }
+            defaultOpen={false}
           />
           <Collapse bordered={false} defaultActiveKey={["types"]}>
             <Collapse.Panel header="Node types" key="types">
