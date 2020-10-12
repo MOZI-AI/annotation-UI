@@ -511,7 +511,7 @@ function Visualizer(props) {
 
   const search = id => {
     cy.batch(function() {
-      const selected = cy.nodes(`[id @= "${id}"]`);
+      const selected = cy.nodes(`[id @= "${id.toUpperCase()}"]`);
       if (selected.size()) {
         selected.select();
         cy.zoom(2);
