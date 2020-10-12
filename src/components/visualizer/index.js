@@ -193,19 +193,6 @@ function Visualizer(props) {
   const [selectedEdge, setSelectedEdge] = useState({
     pubmed: null
   });
-  const [MLLPositions, setMLLPositions] = useState(undefined);
-  // Save MLL positions
-  !MLLPositions &&
-    setMLLPositions(
-      JSON.parse(JSON.stringify(props.graph.nodes)).reduce(function(
-        prevVal,
-        n,
-        i
-      ) {
-        return { ...prevVal, [n.data.id]: n.position };
-      },
-      {})
-    );
 
   useEffect(function() {
     setCy(
@@ -256,7 +243,6 @@ function Visualizer(props) {
   useEffect(
     function() {
       if (cy) {
-        coseLayout();
         cy.style([
           ...CYTOSCAPE_STYLE,
           ...assignColorToAnnotations(),
@@ -269,6 +255,7 @@ function Visualizer(props) {
             }
           }
         ]);
+         setLayout({"name": "preset"})
         // var nav = cy.navigator(NAVIGATOR_CONFIG);
         var options = {
           menuItems: [
@@ -339,30 +326,6 @@ function Visualizer(props) {
     [layout]
   );
 
-  const randomLayout = () => {
-    setLayout(CYTOSCAPE_COLA_CONFIG);
-  };
-
-  const coseLayout = () => {
-    setLayout({
-      name: "preset",
-      positions: function(n) {
-        return MLLPositions[n.id()];
-      }
-    });
-  };
-
-  const breadthFirstLayout = () => {
-    setLayout({ name: "breadthfirst" });
-  };
-
-  const concentricLayout = () => {
-    setLayout({
-      name: "concentric",
-      concentric: node => node.degree(),
-      levelWidth: () => 3
-    });
-  };
 
   const takeScreenshot = () => {
     const link = document.createElement("a");
@@ -697,18 +660,6 @@ function Visualizer(props) {
       {/* <div id="navigator-wrapper"></div> */}
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
-        <Tooltip placement="right" title="Randomize layout">
-          <Button size="large" icon={<SwapOutlined />} onClick={randomLayout} />
-        </Tooltip>
-        <Tooltip placement="right" title="Multi-level layout">
-          <Button size="large" icon={<StarOutlined />} onClick={coseLayout} />
-        </Tooltip>
-        <Tooltip placement="right" title="Breadth-first layout">
-          <Button size="large" icon={<GoldOutlined />} onClick={breadthFirstLayout} />
-        </Tooltip>
-        <Tooltip placement="right" title="Concentric layout">
-          <Button size="large" icon={<PlayCircleOutlined />} onClick={concentricLayout} />
-        </Tooltip>
         <Tooltip placement="right" title="Save screenshot">
           <Button size="large" icon={<CameraOutlined />} onClick={takeScreenshot} />
         </Tooltip>
