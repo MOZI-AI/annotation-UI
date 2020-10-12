@@ -90,7 +90,7 @@ function AnnotationForm(props) {
   const [geneLevel, setGeneLevel] = useState(false);
   const [includeCov, setIncludeCov] = useState(true);
 
-  const [annotatePathwayWithBiogrid, setAnnotatePathwayWithBiogrid] = useState(
+  const [annotatePathwayWithString, setAnnotatePathwayWithString] = useState(
     false
   );
   const [loading, setLoading] = useState(false);
@@ -177,8 +177,8 @@ function AnnotationForm(props) {
         ism.setFilter("include_sm");
         ism.setValue(capitalizeFirstLetter(includeSmallMolecules.toString()));
         const capb = new Filter();
-        capb.setFilter("biogrid");
-        capb.setValue(annotatePathwayWithBiogrid ? "1" : "0");
+        capb.setFilter("string?");
+        capb.setValue(capitalizeFirstLetter(annotatePathwayWithString.toString()));
         const coding = new Filter();
         coding.setFilter("coding");
         coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
@@ -456,11 +456,11 @@ function AnnotationForm(props) {
                   </div>
                   <div className="parameter">
                     <Switch
-                      defaultChecked={annotatePathwayWithBiogrid}
-                      onChange={setAnnotatePathwayWithBiogrid}
+                      defaultChecked={annotatePathwayWithString}
+                      onChange={setAnnotatePathwayWithString}
                     />
                     {"  "}
-                    <div className="label">Cross annotate with biogrid</div>
+                    <div className="label">Cross annotate with STRING</div>
                   </div>
                 </div>
               )}
@@ -568,7 +568,7 @@ function AnnotationForm(props) {
             <div className="label">Include SARS-CoV-2</div>
           </div>
 
-          {annotatePathwayWithBiogrid && (
+          {annotatePathwayWithString && (
             <Alert
               type="warning"
               message="Cross annotation will increase the size"
