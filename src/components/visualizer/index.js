@@ -310,7 +310,7 @@ function Visualizer(props) {
         console.log("Nodes size: " + cy.nodes().length);
         cy.batch(() => {
           setSearchOpts(cy.nodes().map((n) => {
-            return {value: n.data("id"), label: n.data("id")}
+            return {value: n.data("id"), label: n.data("id") + "(" + n.data("name") + ")"}
           }));
         })
 
