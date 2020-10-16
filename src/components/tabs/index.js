@@ -49,7 +49,7 @@ function TabbedViz(props) {
             <Tabs defaultActiveKey="1">
                 {nonGOGraph != null &&
                 <TabPane tab="Main Graph" key="1">
-                    <Visualizer graph={{...nonGOGraph.elements}}
+                    <Visualizer isGO={false} graph={{...nonGOGraph.elements}}
                                 annotations={nonGOGraph.elements.nodes
                                     .reduce(
                                         (acc, n) => [...acc, ...n.data.group, n.data.type],
@@ -61,7 +61,7 @@ function TabbedViz(props) {
                 }
                 {goGraph != null &&
                 <TabPane tab="GO" key="2">
-                    <Visualizer graph={{...goGraph.elements}}
+                    <Visualizer isGO={true} graph={{...goGraph.elements}}
                                 annotations={goGraph.elements.nodes
                                     .reduce(
                                         (acc, n) => [...acc, ...n.data.group, n.data.type],

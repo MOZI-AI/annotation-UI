@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, {Fragment, useState, useEffect} from "react";
 import {
   Tooltip,
   Tree,
@@ -11,8 +11,10 @@ import {
   Drawer,
   AutoComplete
 } from "antd";
-import {FilterOutlined, CloseOutlined, CameraOutlined,
-  DownloadOutlined, InfoCircleOutlined} from "@ant-design/icons"
+import {
+    FilterOutlined, CloseOutlined, CameraOutlined,
+    DownloadOutlined, InfoCircleOutlined
+} from "@ant-design/icons"
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
 import filterSvg from "../../assets/filter.svg";
@@ -30,188 +32,188 @@ const contextMenus = require("cytoscape-context-menus");
 contextMenus(cytoscape, $);
 
 const AnnotationGroups = [
-  {
-    group: "gene-go-annotation",
-    subgroups: [
-      { name: "cellularcomponent", color: "#F57C00" },
-      { name: "molecularfunction", color: "#F1C40F" },
-      { name: "biologicalprocess", color: "#8BC34A" }
-    ]
-  },
-  {
-    group: "gene-pathway-annotation",
-    color: "#9B59B6",
-    subgroups: [{ name: "reactome" }, {"name": "smp"}]
-  },
-  {
-    group: "biogrid-interaction-annotation",
-    color: "#1f92e0",
-    subgroups: []
-  },
-  {
-    group: "rna-annotation",
-    color: "#eb2f96",
-    subgroups: []
-  },
-  {
-    group: "string-interaction-annotation",
-    color: "#2fdbeb",
-    subgroups: []
-  },
-  {
-    group: "go-annotation",
-    color: "#bf8374",
-    subgroups: []
-  }
+    {
+        group: "gene-go-annotation",
+        subgroups: [
+            {name: "cellularcomponent", color: "#F57C00"},
+            {name: "molecularfunction", color: "#F1C40F"},
+            {name: "biologicalprocess", color: "#8BC34A"}
+        ]
+    },
+    {
+        group: "gene-pathway-annotation",
+        color: "#9B59B6",
+        subgroups: [{name: "reactome"}, {"name": "smp"}]
+    },
+    {
+        group: "biogrid-interaction-annotation",
+        color: "#1f92e0",
+        subgroups: []
+    },
+    {
+        group: "rna-annotation",
+        color: "#eb2f96",
+        subgroups: []
+    },
+    {
+        group: "string-interaction-annotation",
+        color: "#2fdbeb",
+        subgroups: []
+    },
+    {
+        group: "go-annotation",
+        color: "#bf8374",
+        subgroups: []
+    }
 ];
 
 const CYTOSCAPE_COLA_CONFIG = {
-  name: "cola",
-  fit: true,
-  animate: true,
-  padding: 10,
-  nodeSpacing: 10,
-  maxSimulationTime: 3000,
-  ungrabifyWhileSimulating: true,
-  randomize: true,
-  avoidOverlap: true,
-  handleDisconnected: true,
-  infinite: false
+    name: "cola",
+    fit: true,
+    animate: true,
+    padding: 10,
+    nodeSpacing: 10,
+    maxSimulationTime: 3000,
+    ungrabifyWhileSimulating: true,
+    randomize: true,
+    avoidOverlap: true,
+    handleDisconnected: true,
+    infinite: false
 };
 
 const CYTOSCAPE_STYLE = [
-  {
-    selector: "node",
-    css: {
-      content: "data(id)",
-      shape: "round-rectangle",
-      width: "mapData(id.length, 0, 20, 50, 200)",
-      height: 40,
-      color: "#fff",
-      "text-wrap": "wrap",
-      "text-max-width": "350px",
-      "text-valign": "center",
-      "text-halign": "center",
-      "background-color": "#565656",
-      "text-outline-color": "#565656",
-      "text-outline-width": 1
-    }
-  },
-  {
-    selector: n => n.data().type === "gene",
-    style: {
-      shape: "ellipse",
-      height: 75,
-      width: 75
-    }
-  },
-  {
-    selector: 'node[type="uniprot"]',
-    css: { shape: "hexagon" }
-  },
-  {
-    selector: 'node[type="chebi"]',
-    css: {
-      shape: "diamond",
-      height: 75
-    }
-  },
-  {
-    selector: "node:selected",
-    css: {
-      "border-width": 5,
-      "border-color": "#87bef5"
-    }
-  },
-  {
-    selector: "edge",
-    css: {
-      "curve-style": "straight",
-      "line-color": "#ccc",
-      width: 4
-    }
-  },
-  {
-    selector: e => e.data().group.includes("gene-go-annotation"),
-    css: {
-      "target-arrow-shape": "triangle",
-      "target-arrow-fill": "filled"
-    }
-  },
-  {
-    selector: e => {
-      return e.group() == "nodes" && e.data().group.includes("rna-annotation");
+    {
+        selector: "node",
+        css: {
+            content: "data(id)",
+            shape: "round-rectangle",
+            width: "mapData(id.length, 0, 20, 50, 200)",
+            height: 40,
+            color: "#fff",
+            "text-wrap": "wrap",
+            "text-max-width": "350px",
+            "text-valign": "center",
+            "text-halign": "center",
+            "background-color": "#565656",
+            "text-outline-color": "#565656",
+            "text-outline-width": 1
+        }
     },
-    css: {
-      shape: "round-pentagon",
-      width: 200
+    {
+        selector: n => n.data().type === "gene",
+        style: {
+            shape: "ellipse",
+            height: 75,
+            width: 75
+        }
+    },
+    {
+        selector: 'node[type="uniprot"]',
+        css: {shape: "hexagon"}
+    },
+    {
+        selector: 'node[type="chebi"]',
+        css: {
+            shape: "diamond",
+            height: 75
+        }
+    },
+    {
+        selector: "node:selected",
+        css: {
+            "border-width": 5,
+            "border-color": "#87bef5"
+        }
+    },
+    {
+        selector: "edge",
+        css: {
+            "curve-style": "straight",
+            "line-color": "#ccc",
+            width: 4
+        }
+    },
+    {
+        selector: e => e.data().group.includes("gene-go-annotation"),
+        css: {
+            "target-arrow-shape": "triangle",
+            "target-arrow-fill": "filled"
+        }
+    },
+    {
+        selector: e => {
+            return e.group() == "nodes" && e.data().group.includes("rna-annotation");
+        },
+        css: {
+            shape: "round-pentagon",
+            width: 200
+        }
     }
-  }
 ];
 
 function Visualizer(props) {
-  cytoscape.use(cola);
-  const cy_wrapper = React.createRef();
-  const [cy, setCy] = useState(undefined);
-  const [layout, setLayout] = useState(undefined);
-  const [filteredElements, setFilteredElements] = useState(undefined);
-  const [contextMenu, setContextMenu] = useState(undefined);
-  const [loaderText, setLoaderText] = useState(undefined);
-  const [isDrawerOpen, setDrawerOpen] = useState(true);
-  const [nodeTypes, setNodeTypes] = useState(
-    props.graph.nodes
-      .map(n => n.data.type)
-      .filter((s, i, arr) => {
-        return (
-          arr.indexOf(s) === i && ["gene", "uniprot", "chebi", "reactome", "smp"].includes(s)
-        );
-      })
-  );
-  const [linkTypes, setLinkTypes] = useState(
-    props.graph.edges
-      .map(e => e.data.name)
-      .filter((s, i, arr) => {
-        return arr.indexOf(s) === i;
-      })
-  );
-  const [visibleNodeTypes, setVisibleNodeTypes] = useState(nodeTypes);
-  const [visibleLinkTypes, setVisibleLinkTypes] = useState(linkTypes);
-  const [visibleAnnotations, setVisibleAnnotations] = useState([
-    "main%",
-    "gene-go-annotation%",
-    "gene-pathway-annotation%",
-    "biogrid-interaction-annotation%",
-    "string-interaction-annotation%",
-    "rna-annotation%",
-    "go-annotation%"
-  ]);
-  const [selectedNode, setSelectedNode] = useState({
-    node: null,
-    position: null
-  });
-  const [selectedEdge, setSelectedEdge] = useState({
-    pubmed: null
-  });
-
-  const [searchOpts, setSearchOpts] = useState([]);
-  const [searchId, setSearchId] = useState(null);
-
-  useEffect(function() {
-    setCy(
-      cytoscape({
-        container: cy_wrapper.current,
-        hideEdgesOnViewport: true,
-        wheelSensitivity: 0.3
-      })
+    cytoscape.use(cola);
+    const cy_wrapper = React.createRef();
+    const [cy, setCy] = useState(undefined);
+    const [layout, setLayout] = useState(undefined);
+    const [filteredElements, setFilteredElements] = useState(undefined);
+    const [contextMenu, setContextMenu] = useState(undefined);
+    const [loaderText, setLoaderText] = useState(undefined);
+    const [isDrawerOpen, setDrawerOpen] = useState(true);
+    const [nodeTypes, setNodeTypes] = useState(
+        props.graph.nodes
+            .map(n => n.data.type)
+            .filter((s, i, arr) => {
+                return (
+                    arr.indexOf(s) === i && ["gene", "uniprot", "chebi", "reactome", "smp"].includes(s)
+                );
+            })
     );
-  }, []);
+    const [linkTypes, setLinkTypes] = useState(
+        props.graph.edges
+            .map(e => e.data.name)
+            .filter((s, i, arr) => {
+                return arr.indexOf(s) === i;
+            })
+    );
+    const [visibleNodeTypes, setVisibleNodeTypes] = useState(nodeTypes);
+    const [visibleLinkTypes, setVisibleLinkTypes] = useState(linkTypes);
+    const [visibleAnnotations, setVisibleAnnotations] = useState([
+        "main%",
+        "gene-go-annotation%",
+        "gene-pathway-annotation%",
+        "biogrid-interaction-annotation%",
+        "string-interaction-annotation%",
+        "rna-annotation%",
+        "go-annotation%"
+    ]);
+    const [selectedNode, setSelectedNode] = useState({
+        node: null,
+        position: null
+    });
+    const [selectedEdge, setSelectedEdge] = useState({
+        pubmed: null
+    });
 
-  useEffect(
-    function() {
-      cy && toggleAnnotationVisibility(visibleAnnotations);
-    },
-    [visibleAnnotations, visibleNodeTypes, visibleLinkTypes, cy]
-  );
+    const [searchOpts, setSearchOpts] = useState([]);
+    const [searchId, setSearchId] = useState(null);
+
+    useEffect(function () {
+        setCy(
+            cytoscape({
+                container: cy_wrapper.current,
+                hideEdgesOnViewport: true,
+                wheelSensitivity: 0.3
+            })
+        );
+    }, []);
+
+    useEffect(
+        function () {
+            cy && toggleAnnotationVisibility(visibleAnnotations);
+        },
+        [visibleAnnotations, visibleNodeTypes, visibleLinkTypes, cy]
+    );
 
   useEffect(
     function() {
@@ -308,48 +310,71 @@ function Visualizer(props) {
         };
         setContextMenu(cy.contextMenus(options));
         console.log("Nodes size: " + cy.nodes().length);
-        cy.batch(() => {
+        if(props.isGO){
+          cy.batch(() => {
+          setSearchOpts(cy.nodes().map((n) => {
+            return {value: n.data("name"), label: n.data("name") + "(" + n.data("id") + ")"}
+          }));
+        })
+        } else {
+          cy.batch(() => {
           setSearchOpts(cy.nodes().map((n) => {
             return {value: n.data("id"), label: n.data("id") + "(" + n.data("name") + ")"}
           }));
         })
+        }
 
-        console.log(searchOpts);
-      }
-    },
-    [cy]
-  );
 
-  useEffect(
-    function() {
-      if (layout) {
-        const l = filteredElements
-          ? filteredElements.layout(layout)
-          : cy.layout(layout);
-        setLoaderText("Applying layout, please wait ...");
-        l.pon("layoutstop", function() {
-          setLoaderText(undefined);
-        });
-        l.run();
-      }
-    },
-    [layout]
-  );
+                console.log(searchOpts);
+            }
+        },
+        [cy]
+    );
 
-  useEffect(function(){
-    if(cy){
-      cy.batch(function() {
-      const selected = cy.nodes(`[id @= "${searchId.toUpperCase()}"]`);
-      if (selected.size()) {
-        selected.select();
-        cy.zoom(2);
-        cy.center(selected);
-      } else {
-        message.warn("No matching results.");
-      }
-    });
+    useEffect(
+        function () {
+            if (layout) {
+                const l = filteredElements
+                    ? filteredElements.layout(layout)
+                    : cy.layout(layout);
+                setLoaderText("Applying layout, please wait ...");
+                l.pon("layoutstop", function () {
+                    setLoaderText(undefined);
+                });
+                l.run();
+            }
+        },
+        [layout]
+    );
+
+useEffect(function () {
+    if (cy) {
+        if (props.isGO) {
+            cy.batch(function () {
+                const selected = cy.nodes(`[name @= "${searchId}"]`);
+                if (selected.size()) {
+                    selected.select();
+                    cy.zoom(2);
+                    cy.center(selected);
+                } else {
+                    message.warn("No matching results.");
+                }
+            });
+        } else {
+            cy.batch(function () {
+                const selected = cy.nodes(`[id @= "${searchId.toUpperCase()}"]`);
+                if (selected.size()) {
+                    selected.select();
+                    cy.zoom(2);
+                    cy.center(selected);
+                } else {
+                    message.warn("No matching results.");
+                }
+            });
+        }
+
     }
-  } ,[searchId])
+}, [searchId])
 
 
   const takeScreenshot = () => {
@@ -621,7 +646,20 @@ function Visualizer(props) {
         width={360}
       >
         <div className="annotation-toggle-wrapper">
+          {props.isGO &&
           <AutoComplete
+            style={{ margin: 5, marginBottom: 15, width: 200 }}
+            placeholder="Type Node Name"
+            options={searchOpts}
+            onSelect={setSearchId}
+            filterOption={(inputValue, option) =>
+              option.value.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1
+             }
+            defaultOpen={false}
+          />
+          }
+          {!props.isGO &&
+            <AutoComplete
             style={{ margin: 5, marginBottom: 15, width: 200 }}
             placeholder="Type Node ID"
             options={searchOpts}
@@ -631,6 +669,7 @@ function Visualizer(props) {
              }
             defaultOpen={false}
           />
+          }
           <Collapse bordered={false} defaultActiveKey={["types"]}>
             <Collapse.Panel header="Node types" key="types">
               <Tree
