@@ -6,6 +6,7 @@ ARG GRPC_ADDR
 ENV GRPC_ADDR $GRPC_ADDR
 ARG RESULT_ADDR
 ENV RESULT_ADDR $RESULT_ADDR
+ENV NODE_OPTIONS '--openssl-legacy-provider' #for webpack to work with legacy openssl
 COPY . ./
 
 RUN npm install
